@@ -1,0 +1,22 @@
+{
+  "name": "@astrolabe/api",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "wrangler dev --port 5286",
+    "build": "wrangler deploy --dry-run --outdir=build",
+    "deploy": "wrangler deploy",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check .",
+    "migrate:local": "wrangler d1 migrations apply APP_DB --local",
+    "migrate:remote": "wrangler d1 migrations apply APP_DB --remote"
+  },
+  "dependencies": {
+    "hono": "^4.7.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20260228.0",
+    "typescript": "^5.9.3",
+    "wrangler": "^4.66.0"
+  }
+}

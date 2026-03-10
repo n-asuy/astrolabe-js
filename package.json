@@ -1,22 +1,25 @@
 {
-  "name": "astrolabe-js",
-  "version": "0.1.0",
+  "name": "astrolabe",
   "private": true,
+  "workspaces": ["packages/*", "apps/*", "tooling/*"],
   "scripts": {
-    "dev": "wrangler dev --port 5286",
-    "deploy": "wrangler deploy",
-    "migrate:local": "wrangler d1 migrations apply APP_DB --local",
-    "migrate:remote": "wrangler d1 migrations apply APP_DB --remote",
-    "typecheck": "tsc --noEmit",
-    "test": "vitest run"
-  },
-  "dependencies": {
-    "hono": "^4.7.0"
+    "build": "turbo build",
+    "clean": "git clean -xdf node_modules",
+    "clean:workspaces": "turbo clean",
+    "dev": "turbo dev --parallel",
+    "dev:app": "turbo dev --filter=@astrolabe/app",
+    "dev:api": "turbo dev --filter=@astrolabe/api",
+    "test": "turbo test --parallel",
+    "format": "biome format --write .",
+    "lint": "turbo lint && bun lint:repo",
+    "lint:repo": "bunx sherif@latest",
+    "lint:repo:fix": "bunx sherif@latest --fix",
+    "typecheck": "turbo typecheck"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20250303.0",
-    "typescript": "^5.7.0",
-    "vitest": "^3.0.0",
-    "wrangler": "^4.0.0"
-  }
+    "@biomejs/biome": "1.8.3",
+    "turbo": "2.1.1",
+    "typescript": "^5.5.4"
+  },
+  "packageManager": "bun@1.1.26"
 }

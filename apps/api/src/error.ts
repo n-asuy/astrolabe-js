@@ -1,5 +1,3 @@
-import { HTTPException } from "hono/http-exception";
-
 export class ApiError extends Error {
   constructor(
     public readonly status: 400 | 401 | 500,
