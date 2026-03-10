@@ -8,6 +8,9 @@ export default defineConfig({
     cloudflare({ viteEnvironment: { name: "ssr" } }),
     reactRouter(),
   ],
+  server: {
+    port: 5285,
+  },
   resolve: {
     alias: {
       "~": path.resolve(__dirname, "./app"),
