@@ -1,0 +1,182 @@
+<p align="center">
+	<h1 align="center"><b>Astrolabe JS</b></h1>
+	<p align="center">
+    SaaS starter kit built as a Turborepo monorepo. Runs entirely on Cloudflare.
+  </p>
+</p>
+
+<p align="center">
+  <a href="#deploy-to-cloudflare"><strong>One-Click Deploy</strong></a> ·
+  <a href="#whats-included"><strong>What's included</strong></a> ·
+  <a href="#getting-started"><strong>Getting Started</strong></a>
+</p>
+
+## Deploy to Cloudflare
+
+Deploy each app to Cloudflare Workers with one click:
+
+| App | Deploy |
+|-----|--------|
+| Frontend (React Router) | [![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/yusa-n/astrolabe-js/tree/main/apps/app) |
+| API (Hono) | [![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/yusa-n/astrolabe-js/tree/main/apps/api) |
+
+## What's included
+
+### Core Technologies
+[Vite](https://vite.dev/) + [@cloudflare/vite-plugin](https://developers.cloudflare.com/workers/vite-plugin/) - Build & deploy<br>
+[React Router v7](https://reactrouter.com/) - Full-stack routing (SSR on Cloudflare Workers)<br>
+[Hono](https://hono.dev/) - Lightweight web framework for Cloudflare Workers<br>
+[Turborepo](https://turbo.build) - Build system<br>
+[Bun](https://bun.sh/) - Package manager & runtime<br>
+[TypeScript](https://www.typescriptlang.org/) - Type safety<br>
+[TailwindCSS](https://tailwindcss.com/) - Styling<br>
+[Shadcn](https://ui.shadcn.com/) - UI components<br>
+
+### Backend & Infrastructure
+[Cloudflare Workers](https://workers.cloudflare.com/) - Edge computing<br>
+[Cloudflare D1](https://developers.cloudflare.com/d1/) - Edge-native SQLite database<br>
+[Supabase Auth](https://supabase.com/auth) - Authentication<br>
+[Stripe](https://stripe.com) - Billing<br>
+
+### Development Tools
+[Biome](https://biomejs.dev) - Linter & formatter<br>
+[Sherif](https://github.com/QuiiBz/sherif) - Monorepo linting<br>
+
+## Directory Structure
+
+```
+apps/
+  app/            React Router v7 on Cloudflare Workers (Vite, Tailwind v3, shadcn) — port 5285
+  api/            Hono on Cloudflare Workers (D1, Stripe) — port 5286
+packages/
+  supabase/       Supabase client and database types
+  ui/             Shared UI components (shadcn/Radix)
+  logger/         Shared logging (Pino)
+tooling/
+  typescript/     Shared TypeScript configurations
+```
+
+## Prerequisites
+
+- [Bun](https://bun.sh/) (v1.1.26 or later)
+- [Cloudflare account](https://cloudflare.com) (for Workers & D1)
+- [Supabase account](https://supabase.com) (for authentication)
+- [Stripe account](https://stripe.com) (for billing)
+
+## Getting Started
+
+1. Install dependencies:
+
+```bash
+bun i
+```
+
+2. Copy environment files:
+
+```bash
+cp apps/app/.env.example apps/app/.env
+cp apps/api/.dev.vars.example apps/api/.dev.vars
+```
+
+3. Set up services:
+
+   **Supabase (Authentication):**
+   - Create a project at [supabase.com](https://supabase.com)
+   - Copy the project URL and anon key to `apps/app/.env`
+   - Copy the project URL to `apps/api/.dev.vars`
+
+   **Cloudflare (API & Database):**
+   - Install Wrangler CLI: `bun add -g wrangler`
+   - Authenticate: `wrangler login`
+   - Create D1 database: `wrangler d1 create astrolabe-db`
+   - Update `apps/api/wrangler.toml` with your database ID
+
+   **Stripe (Billing):**
+   - Copy secret key and webhook secret to `apps/api/.dev.vars`
+
+4. Set up the database:
+
+```bash
+cd apps/api
+wrangler d1 migrations apply APP_DB --local
+```
+
+5. Start development:
+
+```bash
+bun dev          # Start all apps in parallel
+bun dev:app      # Frontend only (port 5285)
+bun dev:api      # Hono API only (port 5286)
+```
+
+### Environment Variables
+
+| App | Variable | Description |
+|-----|----------|-------------|
+| app | `VITE_SUPABASE_URL` | Supabase project URL |
+| app | `VITE_SUPABASE_ANON_KEY` | Supabase anonymous key |
+| app | `VITE_API_URL` | API endpoint (default: `http://localhost:5286`) |
+| api | `SUPABASE_URL` | Supabase project URL |
+| api | `STRIPE_SECRET_KEY` | Stripe secret key |
+| api | `STRIPE_WEBHOOK_SECRET` | Stripe webhook signing secret |
+| api | `APP_BASE_URL` | Frontend URL for Stripe redirects |
+
+## API Development
+
+The API is a Hono application running on Cloudflare Workers with D1 SQLite:
+
+```bash
+cd apps/api
+
+# Type check
+bun run typecheck
+
+# Local database migrations
+wrangler d1 migrations apply APP_DB --local
+
+# Deploy
+wrangler deploy
+
+# Production database migrations
+wrangler d1 migrations apply APP_DB --remote
+```
+
+### API Routes
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| GET | `/api/health` | No | Health check |
+| GET | `/api/session` | Yes | Current user session |
+| GET | `/api/stripe/products` | No | List Stripe products |
+| GET | `/api/stripe/prices` | No | List Stripe prices |
+| POST | `/api/stripe/checkout/sessions` | Yes | Create checkout session |
+| POST | `/api/stripe/billing-portal/sessions` | Yes | Create billing portal session |
+| POST | `/api/webhooks/stripe` | No | Stripe webhook receiver |
+
+## Common Commands
+
+```bash
+bun dev          # Start all apps
+bun build        # Build all apps
+bun typecheck    # TypeScript checking
+bun lint         # Lint with Biome + Sherif
+bun format       # Format with Biome
+bun clean        # Clean build artifacts
+```
+
+## Deployment
+
+### Frontend (Cloudflare Workers)
+
+```bash
+cd apps/app
+bun run deploy   # react-router build && wrangler deploy
+```
+
+### API (Cloudflare Workers)
+
+```bash
+cd apps/api
+wrangler deploy
+wrangler d1 migrations apply APP_DB --remote
+```
